@@ -19,10 +19,11 @@ namespace API.Core
         }
         protected override void Seed(HairSalonContext context)
         {
-            context.Appointments.AddOrUpdate(new Appointment { CustomerID = 1, AppointmentID = 1, Date = "20/02/2018", Time = "9:00 AM" });
-            context.Appointments.AddOrUpdate(new Appointment { CustomerID = 1, AppointmentID = 2, Date = "22/02/2018", Time = "12:30 PM" });
+            context.Appointments.AddOrUpdate(new Appointment { CustomerID = 1, AppointmentID = 1, Date = "20/03/2018", Time = "9:00 AM" });
+            context.Appointments.AddOrUpdate(new Appointment { CustomerID = 1, AppointmentID = 2, Date = "22/03/2018", Time = "12:30 PM" });
+            context.Appointments.AddOrUpdate(new Appointment { CustomerID = 2, AppointmentID = 5, Date = "20/03/2018", Time = "12:30 PM" });
 
-            context.Appointments.AddOrUpdate(new Appointment { CustomerID = 2, AppointmentID = 3, Date = "25/02/2018", Time = "2:00 PM" });
+            context.Appointments.AddOrUpdate(new Appointment { CustomerID = 2, AppointmentID = 3, Date = "22/03/2018", Time = "2:00 PM" });
             context.Appointments.AddOrUpdate(new Appointment { CustomerID = 2, AppointmentID = 4, Date = "27/02/2018", Time = "11:30 AM" });
 
 
@@ -34,7 +35,8 @@ namespace API.Core
 
             context.ServiceProvided.AddOrUpdate(new ServiceProvided { AppointmentID = 1, NumberOfService = 1, ServiceID = 1, EmployeeID = 1 });
             context.ServiceProvided.AddOrUpdate(new ServiceProvided { AppointmentID = 3, NumberOfService = 1, ServiceID = 2, EmployeeID = 1 });
-            context.ServiceProvided.AddOrUpdate(new ServiceProvided { AppointmentID = 1, NumberOfService = 2, ServiceID = 2, EmployeeID = 2 });
+            context.ServiceProvided.AddOrUpdate(new ServiceProvided { AppointmentID = 2, NumberOfService = 1, ServiceID = 2, EmployeeID = 2 });
+            context.ServiceProvided.AddOrUpdate(new ServiceProvided { AppointmentID = 5, NumberOfService = 1, ServiceID = 2, EmployeeID = 2 });
 
             context.Customers.AddOrUpdate(new Customer
             {

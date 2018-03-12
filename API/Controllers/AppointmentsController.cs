@@ -51,7 +51,7 @@ namespace API.Controllers
         [Authorize(Roles = "User")]
         [HttpGet]
         [Route("availableTimes")]
-        public async Task<IHttpActionResult> GetTimes(string fullName)
+        public async Task<IHttpActionResult> GetTimes(string fullName, string date)
         {
             string[] name = fullName.Split();
 
@@ -61,7 +61,7 @@ namespace API.Controllers
             DateTime startHour = new DateTime(0);
             startHour = startHour.Add(new TimeSpan(9, 00, 0));
 
-            while (!startHour.ToString("hh:mm tt").Equals("05:00 PM"))
+            while (!startHour.ToString("hh:mm tt").Equals("05:15 PM"))
             {
 
                 availabletimes.Add(startHour.ToString("hh:mm tt"));
@@ -84,16 +84,23 @@ namespace API.Controllers
 
                 
 
-                List<ServiceProvided> servicedProvided = await context.ServiceProvided.Include(s => s.Service).Where(e => e.EmployeeID == employee.EmployeeID).ToListAsync();
+                List<ServiceProvided> servicedProvided = await context.ServiceProvided.Where(e => e.EmployeeID == employee.EmployeeID && e.Appointment.Date.Equals(date)).ToListAsync();
+              
                 foreach (ServiceProvided sp in servicedProvided)
                 {
                     string time = sp.Appointment.Time;
                     string duration = sp.Service.Duration;
-
                     
                         string[] numbers = Regex.Split(duration, @"\D+");
                         int dur = int.Parse(numbers[0]);
-                        int id = availabletimes.IndexOf("0" + time);
+                    int id;
+                    if (time.Length == 7)
+                    {
+                        id = availabletimes.IndexOf("0" + time);
+                    }else
+                    {
+                        id = availabletimes.IndexOf(time);
+                    }
                         for( int i = 0; i < dur / 15; i++)
                         {
                             availabletimes.RemoveAt(id);
