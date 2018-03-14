@@ -46,40 +46,52 @@ namespace API.Controllers
         // POST api/Account/Register
         [AllowAnonymous]
         [Route("Register")]
-        public async Task<IHttpActionResult> Register(CustomerViewModel customer)
+        public async Task<IHttpActionResult> Register(Customer customer)
         {
-            using (var context = new HairSalonContext())
+            if (!ModelState.IsValid)
             {
-
-                if (await context.Customers.AnyAsync(c => c.Email == customer.Email))
-                    return ResponseMessage(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "Email address already registered"));
-
-                var newCustomer = context.Customers.Add(new Customer
+                CustomerViewModel c = new CustomerViewModel(customer);
+                return BadRequest(ModelState);
+            }
+            else
+            {
+                using (var context = new HairSalonContext())
                 {
-                    FirstName = customer.FirstName,
-                    LastName = customer.LastName,
-                    Email = customer.Email,
-                    Password = customer.Password,
-                    ConfirmPassword = customer.ConfirmPassword,
-                    DOB = customer.DOB,
-                    Phone = customer.Phone,
-                    Gender = customer.Gender
 
-                });
+                    if (await context.Customers.AnyAsync(c => c.Email == customer.Email))
+                    {
+                        ModelState.AddModelError("customer.Email", "Email is already registered");
+                        return BadRequest(ModelState);
+                    }
 
-                string userRoleId = context.Roles.First(c => c.Name == "User").Id;
-                var newUser = context.Users.Add(new IdentityUser(customer.Email) { Email = customer.Email, EmailConfirmed = true });
-                newUser.Roles.Add(new IdentityUserRole { RoleId = userRoleId });
+                    var newCustomer = context.Customers.Add(new Customer
+                    {
+                        FirstName = customer.FirstName,
+                        LastName = customer.LastName,
+                        Email = customer.Email,
+                        Password = customer.Password,
+                        ConfirmPassword = customer.ConfirmPassword,
+                        DOB = customer.DOB,
+                        Phone = customer.Phone,
+                        Gender = customer.Gender
 
-            
+                    });
 
-                var store = new CustomerUserStore();
-                await store.SetPasswordHashAsync(newUser, new CustomerUserManager().PasswordHasher.HashPassword(customer.Password));
-            
-             
-                await context.SaveChangesAsync();
-                return Ok();
-                
+
+                    string userRoleId = context.Roles.First(c => c.Name == "User").Id;
+                    var newUser = context.Users.Add(new IdentityUser(customer.Email) { Email = customer.Email, EmailConfirmed = true });
+                    newUser.Roles.Add(new IdentityUserRole { RoleId = userRoleId });
+
+
+
+                    var store = new CustomerUserStore();
+                    await store.SetPasswordHashAsync(newUser, new CustomerUserManager().PasswordHasher.HashPassword(customer.Password));
+
+
+                    await context.SaveChangesAsync();
+                    return Ok();
+
+                }
             }
         }
     }

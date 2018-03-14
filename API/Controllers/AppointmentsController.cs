@@ -3,8 +3,10 @@ using API.Models;
 using API.ViewModel;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Data.Entity;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
@@ -105,6 +107,7 @@ namespace API.Controllers
                     int chosenDur = int.Parse(chosenServiceSplit[0]);
                     for (int i = 0; i < chosenDur / 15; i++)
                     {
+                        if(id - i > -1)
                         availabletimes.RemoveAt(id - i);
                     }
 
@@ -179,8 +182,21 @@ namespace API.Controllers
                 });
 
                 await context.SaveChangesAsync();
-                return Ok(new ServiceProvidedViewModel(newServiceProvided));
+                String message = HttpUtility.UrlEncode("Thank you for booking an appointment on " + newAppointment.Date + " on " + newAppointment.Time + ". If you have any enquries about the appointment please quote on appointment ID: " + newAppointment.AppointmentID + " When you phone {phone number}. We look forward to seeing you.");
+                string phoneNum = customer.Phone;
+                using (var wb = new WebClient())
+                {
+                    byte[] response = wb.UploadValues("https://api.txtlocal.com/send/", new NameValueCollection()
+                {
+                {"apikey" , "5H7HsKubrWI-GAF5j1aDRdOvoKM11K0GtF1eZQEHS3"},
+                {"numbers" , phoneNum},
+                {"message" , message},
+                {"sender" , "Hair Salon"}
+                });
+                    string result = System.Text.Encoding.UTF8.GetString(response);
+                    return Ok();
 
+                }
             }
 
 
