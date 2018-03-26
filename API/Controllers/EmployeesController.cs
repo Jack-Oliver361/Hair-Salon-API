@@ -10,7 +10,7 @@ namespace API.Controllers
 {
     public class EmployeesController : ApiController
     {
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "Administrator")]
         [HttpGet]
         public async Task<IHttpActionResult> Get()
         {
@@ -27,6 +27,22 @@ namespace API.Controllers
 
                 return Ok(employeeView);
             }
+        }
+
+        [Authorize(Roles = "Administrator")]
+        [HttpPut]
+        public async Task<IHttpActionResult> update(Employee employee)
+        {
+            using (var context = new HairSalonContext())
+            {
+                var entity = await context.Employees.FirstOrDefaultAsync(e => e.EmployeeID == employee.EmployeeID);
+                entity.EmployeeID = employee.EmployeeID;
+                entity.FirstName = employee.FirstName;
+                entity.LastName = employee.LastName;
+                context.SaveChanges();
+                return Ok();
+            }
+
         }
 
         [HttpDelete]

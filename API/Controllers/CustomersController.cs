@@ -15,7 +15,7 @@ namespace API.Controllers
     [RoutePrefix("api/customers")]
     public class CustomersController : ApiController
     {
-        [Authorize(Roles = "Administrator")]
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IHttpActionResult> Get()
         {
@@ -35,12 +35,41 @@ namespace API.Controllers
         }
 
         [Authorize(Roles = "Administrator")]
+        [HttpPut]
+        public async Task<IHttpActionResult> update(Customer customer)
+        {
+            using (var context = new HairSalonContext())
+            {
+                if (!ModelState.IsValid)
+                {
+                    CustomerViewModel c = new CustomerViewModel(customer);
+                    return BadRequest(ModelState);
+                }
+                else
+                {
+                    var entity = await context.Customers.FirstOrDefaultAsync(c => c.CustomerID == customer.CustomerID);
+                    entity.CustomerID = customer.CustomerID;
+                    entity.FirstName = customer.FirstName;
+                    entity.LastName = customer.LastName;
+                    entity.Email = customer.Email;
+                    entity.Password = customer.Password;
+                    entity.ConfirmPassword = customer.ConfirmPassword;
+                    entity.Phone = customer.Phone;
+                    entity.DOB = customer.DOB;
+                    entity.Gender = customer.Gender;
+                    context.SaveChanges();
+                    return Ok();
+                }
+            }
+        }
+
+        [Authorize(Roles = "Administrator")]
         [HttpGet]
         public async Task<IHttpActionResult> Get(int id)
         {
             using (var context = new HairSalonContext())
             {
-                return Ok(await context.Customers.Include(x => x.Appointments).FirstOrDefaultAsync(c => c.CustomerID == id));
+                return Ok(await context.Customers.Include(a => a.Appointments).FirstOrDefaultAsync(c => c.CustomerID == id));
             }
         }
         // POST api/Account/Register
