@@ -118,10 +118,27 @@ namespace API.Controllers
 
 
                     await context.SaveChangesAsync();
-                    return Ok();
+                    return Ok(newCustomer);
 
                 }
             }
+        }
+        [HttpDelete]
+        public async Task<IHttpActionResult> Delete(int id)
+        {
+            using (var context = new HairSalonContext())
+            {
+                var customer = await context.Customers.FirstOrDefaultAsync(r => r.CustomerID == id);
+                if (customer == null)
+                {
+                    return NotFound();
+                }
+
+                context.Customers.Remove(customer);
+                await context.SaveChangesAsync();
+            }
+            return Ok();
+
         }
     }
 }

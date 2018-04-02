@@ -45,6 +45,24 @@ namespace API.Controllers
 
         }
 
+        [Authorize(Roles = "Administrator")]
+        [HttpPost]
+        public async Task<IHttpActionResult> newEmployee(Employee employee)
+        {
+            using (var context = new HairSalonContext())
+            {
+                var newEmployee = context.Employees.Add(new Employee
+                {
+                    FirstName = employee.FirstName,
+                    LastName = employee.LastName
+
+                });
+                await context.SaveChangesAsync();
+                return Ok(newEmployee);
+            }
+
+        }
+
         [HttpDelete]
         public async Task<IHttpActionResult> Delete(int id)
         {
