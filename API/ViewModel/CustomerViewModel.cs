@@ -29,7 +29,7 @@ namespace API.ViewModel
             Phone = customer.Phone;
             DOB = customer.DOB;
             Gender = customer.Gender;
-            Appointment = customer.Appointments;
+           
 
 
         }
@@ -43,7 +43,7 @@ namespace API.ViewModel
         public string Phone { get; set; }
         public string DOB { get; set; }
         public string Gender { get; set; }
-        public List<Appointment> Appointment { get; set; }
+      
         
     }
 }

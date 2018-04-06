@@ -25,7 +25,7 @@ namespace API.Controllers
         {
             using (var context = new HairSalonContext())
             {
-                List<Appointment> Appointments = await context.Appointments.ToListAsync();
+                List<Appointment> Appointments = await context.Appointments.Include(c => c.customer).ToListAsync();
                 List<AppointmentViewModel> appointmentView = new List<AppointmentViewModel>();
                 foreach (Appointment appointment in Appointments)
                 {

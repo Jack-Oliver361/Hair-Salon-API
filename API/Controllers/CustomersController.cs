@@ -21,7 +21,7 @@ namespace API.Controllers
         {
             using (var context = new HairSalonContext())
             {
-                List<Customer> customers = await context.Customers.Include(a => a.Appointments).ToListAsync();
+                List<Customer> customers = await context.Customers.ToListAsync();
                 List<CustomerViewModel> customerView = new List<CustomerViewModel>();
                 foreach (Customer customer in customers)
                 {
@@ -69,7 +69,7 @@ namespace API.Controllers
         {
             using (var context = new HairSalonContext())
             {
-                return Ok(await context.Customers.Include(a => a.Appointments).FirstOrDefaultAsync(c => c.CustomerID == id));
+                return Ok(await context.Customers.FirstOrDefaultAsync(c => c.CustomerID == id));
             }
         }
         // POST api/Account/Register

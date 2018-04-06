@@ -22,7 +22,10 @@ namespace API.ViewModel
             AppointmentID = appointment.AppointmentID;
             CustomerID = appointment.CustomerID;
             Date = appointment.Date;
-            Time = appointment.Time; 
+            Time = appointment.Time;
+            cFirstName = appointment.customer.FirstName;
+            cLastName = appointment.customer.LastName;
+            
 
         }
 
@@ -30,7 +33,9 @@ namespace API.ViewModel
         public int CustomerID { get; set; }
         public string Date { get; set; }
         public string Time { get; set; }
-
+        public string cFirstName { get; set; }
+        public string cLastName { get; set; }
         
+
     }
 }

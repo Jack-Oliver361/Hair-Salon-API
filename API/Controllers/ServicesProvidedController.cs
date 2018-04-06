@@ -5,12 +5,37 @@ using System.Data.Entity;
 using System.Collections.Generic;
 using API.Models;
 using API.ViewModel;
+using System;
 
 namespace API.Controllers
 {
+    [RoutePrefix("api/servicesProvided")]
     public class ServicesProvidedController : ApiController
     {
-    
+
+        [Authorize(Roles = "Administrator")]
+        [Route("dayAppointment/{date}")]
+        [HttpGet]
+        public async Task<IHttpActionResult> Get(string date)
+        {
+            date = date.Replace("-", @"/");
+            using (var context = new HairSalonContext())
+            {
+                List<ServiceProvided> servicesprovided = await context.ServiceProvided.Include(e => e.Employee).Include(s => s.Service).ToListAsync();
+                List<ServiceProvidedViewModel> serviceprovidedView = new List<ServiceProvidedViewModel>();
+                foreach (ServiceProvided serviceprovided in servicesprovided)
+                {
+                    if (serviceprovided.Appointment.Date == date)
+                        serviceprovidedView.Add(new ServiceProvidedViewModel(serviceprovided));
+
+
+
+                }
+                return Ok(serviceprovidedView);
+            }
+        }
+
+
         [Authorize(Roles = "Administrator")]
         [HttpGet]
         public async Task<IHttpActionResult> Get()
@@ -32,6 +57,7 @@ namespace API.Controllers
 
         [Authorize(Roles = "Administrator")]
         [HttpGet]
+        [Route("getservice/{id}/{id2}")]
         public async Task<IHttpActionResult> Get(int id, int id2)
         {
         
@@ -48,6 +74,7 @@ namespace API.Controllers
 
         [Authorize(Roles = "Administrator")]
         [HttpGet]
+        [Route("getAllservice/{id}")]
         public async Task<IHttpActionResult> Get(int id)
         {
             using (var context = new HairSalonContext())
@@ -65,6 +92,10 @@ namespace API.Controllers
                 return Ok(serviceprovidedView);
             }
         }
+
+
+        
+
     }
 
 }

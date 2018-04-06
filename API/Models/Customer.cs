@@ -49,6 +49,5 @@
         [Display(Name = "Gender")]
         public string Gender { get; set; }
 
-        public virtual List<Appointment> Appointments { get; set; }
     }
 }

@@ -9,5 +9,8 @@ namespace API.Models
         public string Time { get; set; }
         public int CustomerID { get; set; }
 
+        public virtual Customer customer { get; set; }
+      
+
     }
 }
