@@ -19,7 +19,7 @@ namespace API.ViewModel
                 return;
             }
 
-            
+            ServiceID = service.ServiceID;
             Name = service.Name;
             Duration = service.Duration;
             Price = service.Price;

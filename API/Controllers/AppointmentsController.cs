@@ -51,7 +51,7 @@ namespace API.Controllers
             }
         }
 
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "User, Administrator")]
         [HttpGet]
         [Route("availableTimes")]
         public async Task<IHttpActionResult> GetTimes(string fullName, string date, string Service)
@@ -147,7 +147,7 @@ namespace API.Controllers
         }
 
 
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "User, Administrator")]
         [HttpPost]
         [Route("createBooking")]
         public async Task<IHttpActionResult> Postappoint(BookingViewModel booking)
