@@ -33,14 +33,22 @@ namespace API.Controllers
         [HttpPut]
         public async Task<IHttpActionResult> update(Employee employee)
         {
-            using (var context = new HairSalonContext())
+            if (!ModelState.IsValid)
             {
-                var entity = await context.Employees.FirstOrDefaultAsync(e => e.EmployeeID == employee.EmployeeID);
-                entity.EmployeeID = employee.EmployeeID;
-                entity.FirstName = employee.FirstName;
-                entity.LastName = employee.LastName;
-                context.SaveChanges();
-                return Ok();
+                EmployeeViewModel e = new EmployeeViewModel(employee);
+                return BadRequest(ModelState);
+            }
+            else
+            {
+                using (var context = new HairSalonContext())
+                {
+                    var entity = await context.Employees.FirstOrDefaultAsync(e => e.EmployeeID == employee.EmployeeID);
+                    entity.EmployeeID = employee.EmployeeID;
+                    entity.FirstName = employee.FirstName;
+                    entity.LastName = employee.LastName;
+                    context.SaveChanges();
+                    return Ok();
+                }
             }
 
         }
@@ -49,16 +57,24 @@ namespace API.Controllers
         [HttpPost]
         public async Task<IHttpActionResult> newEmployee(Employee employee)
         {
-            using (var context = new HairSalonContext())
+            if (!ModelState.IsValid)
             {
-                var newEmployee = context.Employees.Add(new Employee
+                EmployeeViewModel e = new EmployeeViewModel(employee);
+                return BadRequest(ModelState);
+            }
+            else
+            {
+                using (var context = new HairSalonContext())
                 {
-                    FirstName = employee.FirstName,
-                    LastName = employee.LastName
+                    var newEmployee = context.Employees.Add(new Employee
+                    {
+                        FirstName = employee.FirstName,
+                        LastName = employee.LastName
 
-                });
-                await context.SaveChangesAsync();
-                return Ok(newEmployee);
+                    });
+                    await context.SaveChangesAsync();
+                    return Ok(newEmployee);
+                }
             }
 
         }

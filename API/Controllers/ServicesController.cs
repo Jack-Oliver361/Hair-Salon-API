@@ -32,17 +32,25 @@ namespace API.Controllers
         [HttpPost]
         public async Task<IHttpActionResult> newService(Service service)
         {
-            using (var context = new HairSalonContext())
+            if (!ModelState.IsValid)
             {
-                var newService = context.Services.Add(new Service
+                ServiceViewModel s = new ServiceViewModel(service);
+                return BadRequest(ModelState);
+            }
+            else
+            {
+                using (var context = new HairSalonContext())
                 {
-                    Name = service.Name,
-                    Duration = service.Duration,
-                    Price = service.Price
+                    var newService = context.Services.Add(new Service
+                    {
+                        Name = service.Name,
+                        Duration = service.Duration,
+                        Price = service.Price
 
-                });
-                await context.SaveChangesAsync();
-                return Ok(newService);
+                    });
+                    await context.SaveChangesAsync();
+                    return Ok(newService);
+                }
             }
 
         }
@@ -51,15 +59,23 @@ namespace API.Controllers
         [HttpPut]
         public async Task<IHttpActionResult> update(Service service)
         {
-            using (var context = new HairSalonContext())
+            if (!ModelState.IsValid)
             {
-                var entity = await context.Services.FirstOrDefaultAsync(s => s.ServiceID == service.ServiceID);
-                entity.ServiceID = service.ServiceID;
-                entity.Name = service.Name;
-                entity.Duration = service.Duration;
-                entity.Price = service.Price;
-                context.SaveChanges();
-                return Ok();
+                ServiceViewModel s = new ServiceViewModel(service);
+                return BadRequest(ModelState);
+            }
+            else
+            {
+                using (var context = new HairSalonContext())
+                {
+                    var entity = await context.Services.FirstOrDefaultAsync(s => s.ServiceID == service.ServiceID);
+                    entity.ServiceID = service.ServiceID;
+                    entity.Name = service.Name;
+                    entity.Duration = service.Duration;
+                    entity.Price = service.Price;
+                    context.SaveChanges();
+                    return Ok();
+                }
             }
 
         }
