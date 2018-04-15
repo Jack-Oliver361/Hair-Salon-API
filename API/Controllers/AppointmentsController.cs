@@ -11,9 +11,11 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
+using System.Web.Http.Cors;
 
 namespace API.Controllers
 {
+    [EnableCors(origins: "*", headers: "*", methods: "*")]
     [RoutePrefix("api/appointments")]
     public class AppointmentsController : ApiController
     {
@@ -53,7 +55,6 @@ namespace API.Controllers
 
         [Authorize(Roles = "User, Administrator")]
         [HttpGet]
-        [Route("availableTimes")]
         public async Task<IHttpActionResult> GetTimes(string fullName, string date, string Service)
         {
             string[] name = fullName.Split();
@@ -120,37 +121,9 @@ namespace API.Controllers
         }
 
 
-
-
         [HttpPost]
-        [Route("create")]
-        public async Task<IHttpActionResult> Post([FromBody] AppointmentViewModel appointment)
-        {
-            using (var context = new HairSalonContext())
-            {
-                var customer = await context.Customers.FirstOrDefaultAsync(b => b.CustomerID == appointment.CustomerID);
-                if (customer == null)
-                {
-                    return NotFound();
-                }
-
-                var newAppointment = context.Appointments.Add(new Appointment
-                {
-                    CustomerID = customer.CustomerID,
-                    Date = appointment.Date,
-                    Time = appointment.Time
-                });
-
-                await context.SaveChangesAsync();
-                return Ok(new AppointmentViewModel(newAppointment));
-            }
-        }
-
-
         [Authorize(Roles = "User, Administrator")]
-        [HttpPost]
-        [Route("createBooking")]
-        public async Task<IHttpActionResult> Postappoint(BookingViewModel booking)
+        public async Task<IHttpActionResult> createBooking(BookingViewModel booking)
         {
             using (var context = new HairSalonContext())
             {
@@ -202,8 +175,6 @@ namespace API.Controllers
 
 
         }
-
-
 
         [HttpDelete]
         public async Task<IHttpActionResult> Delete(int id)

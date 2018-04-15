@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace API.Controllers
 {
-    [RoutePrefix("api/customers")]
+   //[RoutePrefix("api/customers")]
     public class CustomersController : ApiController
     {
         [AllowAnonymous]
@@ -34,7 +34,7 @@ namespace API.Controllers
             }
         }
 
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "User, Administrator")]
         [HttpPut]
         public async Task<IHttpActionResult> update(Customer customer)
         {
@@ -67,9 +67,20 @@ namespace API.Controllers
         [HttpGet]
         public async Task<IHttpActionResult> Get(int id)
         {
+            return Ok("id");
             using (var context = new HairSalonContext())
             {
                 return Ok(await context.Customers.FirstOrDefaultAsync(c => c.CustomerID == id));
+            }
+        }
+        [Authorize(Roles = "User, Administrator")]
+        [HttpGet]
+        public async Task<IHttpActionResult> GetCustomer(string email)
+        {
+            using (var context = new HairSalonContext())
+            {
+                Customer customer = await context.Customers.FirstOrDefaultAsync(c => c.Email == email);
+                return Ok(customer);
             }
         }
         // POST api/Account/Register

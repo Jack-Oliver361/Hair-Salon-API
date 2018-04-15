@@ -10,7 +10,7 @@ namespace API.Controllers
 {
     public class ServicesController : ApiController
     {
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "Administrator, User")]
         [HttpGet]
         public async Task<IHttpActionResult> Get()
         {
