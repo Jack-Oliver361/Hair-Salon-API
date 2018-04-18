@@ -18,7 +18,6 @@ namespace API.Identity
         public override Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
         {
             context.OwinContext.Response.Headers.Add("Access-Control-Allow-Origin", new[] { "*" });
-
             var user = context.OwinContext.Get<HairSalonContext>().Users.FirstOrDefault(u => u.UserName == context.UserName);
             if (!context.OwinContext.Get<CustomerUserManager>().CheckPassword(user, context.Password))
             {

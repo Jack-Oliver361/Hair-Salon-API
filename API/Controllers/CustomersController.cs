@@ -9,18 +9,20 @@ using System.Net;
 using System.Net.Http;
 using Microsoft.AspNet.Identity.EntityFramework;
 using System.Linq;
+using Microsoft.AspNet.Identity;
 
 namespace API.Controllers
 {
-   //[RoutePrefix("api/customers")]
+
     public class CustomersController : ApiController
     {
-        [AllowAnonymous]
+        [Authorize(Roles = "Administrator")]
         [HttpGet]
         public async Task<IHttpActionResult> Get()
         {
             using (var context = new HairSalonContext())
             {
+                
                 List<Customer> customers = await context.Customers.ToListAsync();
                 List<CustomerViewModel> customerView = new List<CustomerViewModel>();
                 foreach (Customer customer in customers)
@@ -38,28 +40,48 @@ namespace API.Controllers
         [HttpPut]
         public async Task<IHttpActionResult> update(Customer customer)
         {
-            using (var context = new HairSalonContext())
+            if ((User.IsInRole("User") && customer.Email == User.Identity.GetUserId()) || User.IsInRole("Administrator"))
             {
-                if (!ModelState.IsValid)
+                using (var context = new HairSalonContext())
                 {
-                    CustomerViewModel c = new CustomerViewModel(customer);
-                    return BadRequest(ModelState);
+
+                    if (!ModelState.IsValid)
+                    {
+                        CustomerViewModel c = new CustomerViewModel(customer);
+                        return BadRequest(ModelState);
+                    }
+                    else
+                    {
+                        var entity = await context.Customers.FirstOrDefaultAsync(c => c.CustomerID == customer.CustomerID);
+                        entity.CustomerID = customer.CustomerID;
+                        entity.FirstName = customer.FirstName;
+                        entity.LastName = customer.LastName;
+                        entity.Email = customer.Email;
+                        entity.Password = customer.Password;
+                        entity.ConfirmPassword = customer.ConfirmPassword;
+                        entity.Phone = customer.Phone;
+                        entity.DOB = customer.DOB;
+                        entity.Gender = customer.Gender;
+
+                        var store = new UserStore<IdentityUser>(new HairSalonContext());
+                        var manager = new UserManager<IdentityUser>(store);
+                        var currentUser = manager.FindByEmail(customer.Email);
+                        currentUser.PasswordHash = new CustomerUserManager().PasswordHasher.HashPassword(customer.Password);
+                        await manager.UpdateAsync(currentUser);
+                        var userContext = store.Context;
+                        userContext.SaveChanges();
+                        context.SaveChanges();
+
+                      
+
+
+
+                        return Ok();
+                    }
                 }
-                else
-                {
-                    var entity = await context.Customers.FirstOrDefaultAsync(c => c.CustomerID == customer.CustomerID);
-                    entity.CustomerID = customer.CustomerID;
-                    entity.FirstName = customer.FirstName;
-                    entity.LastName = customer.LastName;
-                    entity.Email = customer.Email;
-                    entity.Password = customer.Password;
-                    entity.ConfirmPassword = customer.ConfirmPassword;
-                    entity.Phone = customer.Phone;
-                    entity.DOB = customer.DOB;
-                    entity.Gender = customer.Gender;
-                    context.SaveChanges();
-                    return Ok();
-                }
+            }else
+            {
+                return Unauthorized();
             }
         }
 
@@ -67,25 +89,29 @@ namespace API.Controllers
         [HttpGet]
         public async Task<IHttpActionResult> Get(int id)
         {
-            return Ok("id");
             using (var context = new HairSalonContext())
             {
                 return Ok(await context.Customers.FirstOrDefaultAsync(c => c.CustomerID == id));
             }
         }
+
         [Authorize(Roles = "User, Administrator")]
         [HttpGet]
         public async Task<IHttpActionResult> GetCustomer(string email)
         {
-            using (var context = new HairSalonContext())
-            {
-                Customer customer = await context.Customers.FirstOrDefaultAsync(c => c.Email == email);
-                return Ok(customer);
-            }
+            if ((User.IsInRole("User") && email == User.Identity.GetUserId()) || User.IsInRole("Administrator")) {
+                    using (var context = new HairSalonContext())
+                    {
+                        Customer customer = await context.Customers.FirstOrDefaultAsync(c => c.Email == email);
+                        return Ok(customer);
+                    }
+                }else{
+                return Unauthorized();
+                }
         }
-        // POST api/Account/Register
+
+
         [AllowAnonymous]
-        [Route("Register")]
         public async Task<IHttpActionResult> Register(Customer customer)
         {
             if (!ModelState.IsValid)
@@ -134,6 +160,7 @@ namespace API.Controllers
                 }
             }
         }
+
         [HttpDelete]
         public async Task<IHttpActionResult> Delete(int id)
         {
@@ -144,7 +171,12 @@ namespace API.Controllers
                 {
                     return NotFound();
                 }
-
+                var store = new UserStore<IdentityUser>(new HairSalonContext());
+                var manager = new UserManager<IdentityUser>(store);
+                var currentUser = manager.FindByEmail(customer.Email);
+                manager.Delete(currentUser);
+                var userContext = store.Context;
+                userContext.SaveChanges();
                 context.Customers.Remove(customer);
                 await context.SaveChangesAsync();
             }
