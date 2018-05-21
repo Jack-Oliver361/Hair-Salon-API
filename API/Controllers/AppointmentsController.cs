@@ -1,10 +1,12 @@
 ﻿using API.Core;
 using API.Models;
 using API.ViewModel;
+using Revalee.Client;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Data.Entity;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -64,11 +66,17 @@ namespace API.Controllers
 
             DateTime startHour = new DateTime(0);
             startHour = startHour.Add(new TimeSpan(9, 00, 0));
-
-            while (!startHour.ToString("hh:mm tt").Equals("05:15 PM"))
+            while (!startHour.ToString("hh:mm tt").Equals("01:00 PM"))
             {
 
                 availabletimes.Add(startHour.ToString("hh:mm tt"));
+                startHour = startHour.Add(new TimeSpan(0, 15, 0));
+
+            }
+            while (!startHour.ToString("%h:mm tt").Equals("5:15 PM"))
+            {
+
+                availabletimes.Add(startHour.ToString("h:mm tt"));
                 startHour = startHour.Add(new TimeSpan(0, 15, 0));
 
             }
@@ -93,7 +101,7 @@ namespace API.Controllers
                     int id;
                     if (time.Length == 7)
                     {
-                        id = availabletimes.IndexOf("0" + time);
+                        id = availabletimes.IndexOf(time);
                     }
                     else
                     {
@@ -108,8 +116,8 @@ namespace API.Controllers
                     int chosenDur = int.Parse(chosenServiceSplit[0]);
                     for (int i = 0; i < chosenDur / 15; i++)
                     {
-                        if(id - i > -1)
-                        availabletimes.RemoveAt(id - i);
+                        if (id - i > -1)
+                            availabletimes.RemoveAt(id - i);
                     }
 
                 }
@@ -155,6 +163,9 @@ namespace API.Controllers
                 });
 
                 await context.SaveChangesAsync();
+
+                
+
                 String message = HttpUtility.UrlEncode("Thank you for booking an appointment on " + newAppointment.Date + " on " + newAppointment.Time + ". If you have any enquries about the appointment please quote on appointment ID: " + newAppointment.AppointmentID + " When you phone {phone number}. We look forward to seeing you.");
                 string phoneNum = customer.Phone;
                 using (var wb = new WebClient())
@@ -192,6 +203,45 @@ namespace API.Controllers
             }
             return Ok();
 
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IHttpActionResult> SMSNotifi()
+        {
+
+            TimeSpan now = DateTime.Now.TimeOfDay;
+            using (var context = new HairSalonContext())
+            {
+                List<Appointment> Appointments = await context.Appointments.Include(c => c.customer).ToListAsync();
+                List<AppointmentViewModel> appointmentView = new List<AppointmentViewModel>();
+                foreach (Appointment appointment in Appointments)
+                {
+                    DateTime localDate = DateTime.Now.Date.AddHours(DateTime.Now.Hour).AddMinutes(DateTime.Now.Minute);
+                    DateTime roundedDown = new DateTime(localDate.Year, localDate.Month, localDate.Day, localDate.Hour, localDate.Minute, 0).AddMinutes(-localDate.Minute % 15);
+                    DateTime appointmentTime = DateTime.ParseExact(appointment.Date + " " + appointment.Time, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture);
+                    if (roundedDown == appointmentTime.AddHours(-24))
+                    {
+                        String message = HttpUtility.UrlEncode("This is a reminder that a you have booked a hair appointment on " + appointment.Date + " at " + appointment.Time + ". We hope to see you there. If you would like to cancel please phone the hair salon at quote " + appointment.AppointmentID + ". Thank you");
+                        string phoneNum = appointment.customer.Phone;
+                        using (var wb = new WebClient())
+                        {
+                            byte[] response = wb.UploadValues("https://api.txtlocal.com/send/", new NameValueCollection()
+                         {
+                            {"apikey" , "5H7HsKubrWI-GAF5j1aDRdOvoKM11K0GtF1eZQEHS3"},
+                            {"numbers" , phoneNum},
+                            {"message" , message},
+                            {"sender" , "Hair Salon"}
+                        });
+                            string result = System.Text.Encoding.UTF8.GetString(response);
+                            return Ok();
+
+                        }
+                    }
+                }
+                return NotFound();
+
+            }
         }
     }
 }

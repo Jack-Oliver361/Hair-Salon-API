@@ -79,5 +79,22 @@ namespace API.Controllers
             }
 
         }
+        [HttpDelete]
+        public async Task<IHttpActionResult> Delete(int id)
+        {
+            using (var context = new HairSalonContext())
+            {
+                var service = await context.Services.FirstOrDefaultAsync(r => r.ServiceID == id);
+                if (service == null)
+                {
+                    return NotFound();
+                }
+
+                context.Services.Remove(service);
+                await context.SaveChangesAsync();
+            }
+            return Ok();
+
+        }
     }
 }

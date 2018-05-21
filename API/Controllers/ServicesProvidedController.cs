@@ -22,16 +22,54 @@ namespace API.Controllers
             using (var context = new HairSalonContext())
             {
                 List<ServiceProvided> servicesprovided = await context.ServiceProvided.Include(e => e.Employee).Include(s => s.Service).ToListAsync();
+                List<ServiceProvided> appointments = new List<ServiceProvided>();
                 List<ServiceProvidedViewModel> serviceprovidedView = new List<ServiceProvidedViewModel>();
                 foreach (ServiceProvided serviceprovided in servicesprovided)
                 {
                     if (serviceprovided.Appointment.Date == date)
-                        serviceprovidedView.Add(new ServiceProvidedViewModel(serviceprovided));
-
-
+                        appointments.Add(serviceprovided);
 
                 }
-                return Ok(serviceprovidedView);
+
+                List<ServiceProvided> AM = new List<ServiceProvided>();
+                List<ServiceProvided> noon = new List<ServiceProvided>();
+                List<ServiceProvided> PM = new List<ServiceProvided>();
+
+                foreach (ServiceProvided appointment in appointments)
+                {
+                    if (appointment.Appointment.Time.Contains("12"))
+                    {
+                        noon.Add(appointment);
+                    }else if (appointment.Appointment.Time.Contains("AM"))
+                    {
+                        AM.Add(appointment);
+
+                    }else if (appointment.Appointment.Time.Contains("PM") && !appointment.Appointment.Time.Contains("12"))
+                    {
+                        PM.Add(appointment);
+
+                    }
+                       
+
+                }
+                AM.Sort((x, y) => string.Compare(x.Appointment.Time, y.Appointment.Time));
+                noon.Sort((x, y) => string.Compare(x.Appointment.Time, y.Appointment.Time));
+                PM.Sort((x, y) => string.Compare(x.Appointment.Time, y.Appointment.Time));
+
+                foreach (ServiceProvided serviceprovided in AM)
+                {
+                    serviceprovidedView.Add(new ServiceProvidedViewModel(serviceprovided));
+                }
+                foreach (ServiceProvided serviceprovided in noon)
+                {
+                    serviceprovidedView.Add(new ServiceProvidedViewModel(serviceprovided));
+                }
+                foreach (ServiceProvided serviceprovided in PM)
+                {
+                    serviceprovidedView.Add(new ServiceProvidedViewModel(serviceprovided));
+                }
+
+               return Ok(serviceprovidedView);
             }
         }
 

@@ -168,3 +168,5 @@ C:\Users\Jacko\Desktop\Hair Salon API\API\bin\System.Web.Http.WebHost.xml
 C:\Users\Jacko\Desktop\Hair Salon API\API\obj\Debug\API.csprojResolveAssemblyReference.cache
 C:\Users\Jacko\Desktop\Hair Salon API\API\obj\Debug\API.dll
 C:\Users\Jacko\Desktop\Hair Salon API\API\obj\Debug\API.pdb
+C:\Users\Jacko\Desktop\Hair Salon API\API\bin\Revalee.Client.dll
+C:\Users\Jacko\Desktop\Hair Salon API\API\bin\Revalee.Client.xml

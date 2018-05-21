@@ -167,6 +167,7 @@ namespace API.Controllers
             using (var context = new HairSalonContext())
             {
                 var customer = await context.Customers.FirstOrDefaultAsync(r => r.CustomerID == id);
+                List<Appointment> Appointments = await context.Appointments.Where(a => a.CustomerID == id).ToListAsync();
                 if (customer == null)
                 {
                     return NotFound();
@@ -178,6 +179,10 @@ namespace API.Controllers
                 var userContext = store.Context;
                 userContext.SaveChanges();
                 context.Customers.Remove(customer);
+                foreach (var a in Appointments)
+                {
+                    context.Appointments.Remove(a);
+                }
                 await context.SaveChangesAsync();
             }
             return Ok();
